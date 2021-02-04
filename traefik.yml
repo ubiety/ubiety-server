@@ -10,6 +10,7 @@ services:
       placement:
         constraints:
           - node.labels.traefik-public.traefik-public-certificates == true
+          - node.role == manager
     labels:
       - traefik.enable=true
       - traefik.docker.network=traefik-public
@@ -35,6 +36,7 @@ services:
       - --providers.docker.constraints=Label(`traefik.constraint-label`, `traefik-public`)
       - --providers.docker.exposedbydefault=false
       - --providers.docker.swarmmode
+      - --providers.docker.endpoint=unix:///var/run/docker.sock
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
       - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
