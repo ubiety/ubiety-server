@@ -11,21 +11,23 @@ services:
       - HOLD_DAYS=10
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASS}
-    image: ${IMAGE_REPO}:zammad-postgresql${VERSION}
-    links:
-      - zammad-postgresql
-    restart: ${RESTART}
+    image: zammad/zammad-docker-compose:zammad-postgresql-3.6.0-20
+    restart: always
     volumes:
       - zammad-backup:/var/tmp/zammad
       - zammad-data:/opt/zammad
+    networks:
+      - zammad
 
   zammad-elasticsearch:
     environment:
       - discovery.type=single-node
-    image: ${IMAGE_REPO}:zammad-elasticsearch${VERSION}
-    restart: ${RESTART}
+    image: zammad/zammad-docker-compose:zammad-elasticsearch-3.6.0-20
+    restart: always
     volumes:
       - elasticsearch-data:/usr/share/elasticsearch/data
+    networks:
+      - zammad
 
   zammad-init:
     command: ["zammad-init"]
@@ -34,28 +36,26 @@ services:
     environment:
       - POSTGRESQL_USER=${POSTGRES_USER}
       - POSTGRESQL_PASS=${POSTGRES_PASS}
-    image: ${IMAGE_REPO}:zammad${VERSION}
-    links:
-      - zammad-elasticsearch
-      - zammad-postgresql
+    image: zammad/zammad-docker-compose:zammad-3.6.0-20
     restart: on-failure
     volumes:
       - zammad-data:/opt/zammad
+    networks:
+      - zammad
 
   zammad-memcached:
     command: memcached -m 256M
     image: memcached:1.6.9-alpine
-    restart: ${RESTART}
+    restart: always
+    networks:
+      - zammad
 
   zammad-nginx:
     command: ["zammad-nginx"]
     depends_on:
       - zammad-railsserver
-    image: ${IMAGE_REPO}:zammad${VERSION}
-    links:
-      - zammad-railsserver
-      - zammad-websocket
-    restart: ${RESTART}
+    image: zammad/zammad-docker-compose:zammad-3.6.0-20
+    restart: always
     volumes:
       - zammad-data:/opt/zammad
     deploy:
@@ -68,56 +68,54 @@ services:
         - traefik.http.services.zammad.loadbalancer.server.port=80
     networks:
       - traefik-public
+      - zammad
 
   zammad-postgresql:
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASS}
-    image: ${IMAGE_REPO}:zammad-postgresql${VERSION}
-    restart: ${RESTART}
+    image: zammad/zammad-docker-compose:zammad-postgresql-3.6.0-20
+    restart: always
     volumes:
       - postgresql-data:/var/lib/postgresql/data
+    networks:
+      - zammad
 
   zammad-railsserver:
     command: ["zammad-railsserver"]
     depends_on:
       - zammad-memcached
       - zammad-postgresql
-    image: ${IMAGE_REPO}:zammad${VERSION}
-    links:
-      - zammad-elasticsearch
-      - zammad-memcached
-      - zammad-postgresql
-    restart: ${RESTART}
+    image: zammad/zammad-docker-compose:zammad-3.6.0-20
+    restart: always
     volumes:
       - zammad-data:/opt/zammad
+    networks:
+      - zammad
 
   zammad-scheduler:
     command: ["zammad-scheduler"]
     depends_on:
       - zammad-memcached
       - zammad-railsserver
-    image: ${IMAGE_REPO}:zammad${VERSION}
-    links:
-      - zammad-elasticsearch
-      - zammad-memcached
-      - zammad-postgresql
-    restart: ${RESTART}
+    image: zammad/zammad-docker-compose:zammad-3.6.0-20
+    restart: always
     volumes:
       - zammad-data:/opt/zammad
+    networks:
+      - zammad
 
   zammad-websocket:
     command: ["zammad-websocket"]
     depends_on:
       - zammad-memcached
       - zammad-railsserver
-    image: ${IMAGE_REPO}:zammad${VERSION}
-    links:
-      - zammad-postgresql
-      - zammad-memcached
-    restart: ${RESTART}
+    image: zammad/zammad-docker-compose:zammad-3.6.0-20
+    restart: always
     volumes:
       - zammad-data:/opt/zammad
+    networks:
+      - zammad
 
 volumes:
   elasticsearch-data:
@@ -128,3 +126,7 @@ volumes:
     driver: local
   zammad-data:
     driver: local
+
+networks:
+  zammad:
+    attachable: true
