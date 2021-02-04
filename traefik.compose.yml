@@ -33,7 +33,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - traefik-public-certificates:/certificates
-      - $PWD/traefik.yml:/etc/traefik/traefik.yml
+      - ./traefik.yml:/etc/traefik/traefik.yml
     networks:
       - default
       - traefik-public
