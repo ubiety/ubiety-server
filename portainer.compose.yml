@@ -28,7 +28,6 @@ services:
       placement:
         constraints:
           - node.role == manager
-          - node.labels.portainer.portainer-data == true
       labels:
         - traefik.enable=true
         - traefik.http.routers.portainer-https.rule=Host(`portainer.sys.ubiety.ca`)
