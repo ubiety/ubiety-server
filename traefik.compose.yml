@@ -1,0 +1,53 @@
+version: "3.3"
+
+services:
+  traefik:
+    image: traefik:v2.4
+    ports:
+      - 80:80
+      - 443:443
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=traefik-public
+
+      - traefik.http.middlewares.admin-auth.basicauth.usersfile=/etc/htpasswd
+
+      - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+      - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+
+      - traefik.http.routers.traefik-public-https.rule=Host(`traefik.sys.ubiety.ca`)
+      - traefik.http.routers.traefik-public-https.entrypoints=https
+      - traefik.http.routers.traefik-public-https.tls=true
+      - traefik.http.routers.traefik-public-https.service=api@internal
+      - traefik.http.routers.traefik-public-https.tls.certresolver=le
+      - traefik.http.routers.traefik-public-https.middlewares=admin-auth
+      - traefik.http.services.traefik-public.loadbalancer.server.port=8080
+
+      - traefik.http.routers.redirect.rule=hostregexp(`{host:.+}`)
+      - traefik.http.routers.redirect.entrypoints=http
+      - traefik.http.routers.middlewares=https-redirect
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-public-certificates:/certificates
+      - $PWD/traefik.yml:/etc/traefik/traefik.yml
+    networks:
+      - default
+      - traefik-public
+    configs:
+      - source: basicauth_htpasswd
+        target: /etc/htpasswd
+
+volumes:
+  traefik-public-certificates:
+
+networks:
+  traefik-public:
+    external: true
+
+configs:
+  basicauth_htpasswd:
+    file: ./config/basicauth/htpasswd
