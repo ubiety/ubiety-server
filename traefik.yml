@@ -37,9 +37,9 @@ services:
       - --providers.docker.swarmmode
       - --entrypoints.http.address=:80
       - --entrypoints.https.address=:443
-      - --certificateresolvers.le.acme.email=${EMAIL?Variable not set}
-      - --certificateresolvers.le.acme.storage=/certificates/acme.json
-      - --certificateresolvers.le.acme.tlschallenge=true
+      - --certificatesresolvers.le.acme.email=${EMAIL?Variable not set}
+      - --certificatesresolvers.le.acme.storage=/certificates/acme.json
+      - --certificatesresolvers.le.acme.tlschallenge=true
       - --accesslog
       - --log
       - --api
