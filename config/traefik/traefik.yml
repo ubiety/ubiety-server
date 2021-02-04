@@ -15,7 +15,8 @@ api:
   dashboard: true
 
 accessLog: {}
-log: {}
+log:
+  level: DEBUG
 
 certificatesResolvers:
   le:
