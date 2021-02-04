@@ -1,0 +1,83 @@
+version: '3.3'
+services:
+  traefik:
+    image: traefik:v2.4
+    ports:
+      - '80:80'
+      - '443:443'
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      labels:
+        - traefik.enable=true
+        - traefik.http.middlewares.admin-auth.basicauth.usersfile=/etc/htpasswd
+        - traefik.http.middlewares.https-redirect.redirectscheme.scheme=https
+        - traefik.http.middlewares.https-redirect.redirectscheme.permanent=true
+        - >-
+          traefik.http.routers.traefik-public-https.rule=Host(`traefik.sys.ubiety.ca`)
+        - traefik.http.routers.traefik-public-https.entrypoints=https
+        - traefik.http.routers.traefik-public-https.tls=true
+        - traefik.http.routers.traefik-public-https.service=api@internal
+        - traefik.http.routers.traefik-public-https.tls.certresolver=le
+        - traefik.http.routers.traefik-public-https.middlewares=admin-auth
+        - traefik.http.services.traefik-public.loadbalancer.server.port=8080
+        - traefik.http.routers.redirect.rule=hostregexp(`{host:.+}`)
+        - traefik.http.routers.redirect.entrypoints=http
+        - traefik.http.routers.redirect.middlewares=https-redirect
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik-public-certificates:/certificates
+      - ./config/traefik/traefik.yml:/etc/traefik/traefik.yml
+    networks:
+      - default
+      - traefik-public
+    configs:
+      - source: basicauth_htpasswd
+        target: /etc/htpasswd
+  agent:
+    image: portainer/agent
+    environment:
+      AGENT_CLUSTER_ADDR: tasks.agent
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /var/lib/docker/volumes:/var/lib/docker/volumes
+    networks:
+      - agent-network
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.platform.os == linux
+  portainer:
+    image: portainer/portainer
+    command: '-H tcp://tasks.agent:9001 --tlsskipverify'
+    volumes:
+      - portainer-data:/data
+    networks:
+      - agent-network
+      - traefik-public
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+          - node.labels.portainer.portainer-data == true
+      labels:
+        - traefik.enable=true
+        - >-
+          traefik.http.routers.portainer-https.rule=Host(`portainer.sys.ubiety.ca`)
+        - traefik.http.routers.portainer-https.entrypoints=https
+        - traefik.http.routers.portainer-https.tls=true
+        - traefik.http.routers.portainer-https.tls.certresolver=le
+        - traefik.http.services.portainer.loadbalancer.server.port=9000
+volumes:
+  traefik-public-certificates: null
+  portainer-data: null
+networks:
+  traefik-public:
+    external: true
+  agent-network:
+    attachable: true
+configs:
+  basicauth_htpasswd:
+    file: ./config/basicauth/htpasswd
