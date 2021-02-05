@@ -14,8 +14,8 @@ services:
     image: zammad/zammad-docker-compose:zammad-postgresql-3.6.0-44
     restart: always
     volumes:
-      - zammad-backup:/var/tmp/zammad
-      - zammad-data:/opt/zammad
+      - /mnt/disks/data/zammad-backup:/var/tmp/zammad
+      - /mnt/disks/data/zammad-data:/opt/zammad
     networks:
       - zammad
 
@@ -25,7 +25,7 @@ services:
     image: zammad/zammad-docker-compose:zammad-elasticsearch-3.6.0-44
     restart: always
     volumes:
-      - elasticsearch-data:/usr/share/elasticsearch/data
+      - /mnt/disks/data/elasticsearch-data:/usr/share/elasticsearch/data
     networks:
       - zammad
 
@@ -39,7 +39,7 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: on-failure
     volumes:
-      - zammad-data:/opt/zammad
+      - /mnt/disks/data/zammad-data:/opt/zammad
     networks:
       - zammad
 
@@ -57,7 +57,7 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: always
     volumes:
-      - zammad-data:/opt/zammad
+      - /mnt/disks/data/zammad-data:/opt/zammad
     deploy:
       labels:
         - traefik.enable=true
@@ -77,7 +77,7 @@ services:
     image: postgres:13.1
     restart: always
     volumes:
-      - postgresql-data:/var/lib/postgresql/data
+      - /mnt/disks/data/postgresql-data:/var/lib/postgresql/data
     networks:
       - zammad
 
@@ -89,7 +89,7 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: always
     volumes:
-      - zammad-data:/opt/zammad
+      - /mnt/disks/data/zammad-data:/opt/zammad
     networks:
       - zammad
 
@@ -101,7 +101,7 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: always
     volumes:
-      - zammad-data:/opt/zammad
+      - /mnt/disks/data/zammad-data:/opt/zammad
     networks:
       - zammad
 
@@ -113,19 +113,9 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: always
     volumes:
-      - zammad-data:/opt/zammad
+      - /mnt/disks/data/zammad-data:/opt/zammad
     networks:
       - zammad
-
-volumes:
-  elasticsearch-data:
-    driver: local
-  postgresql-data:
-    driver: local
-  zammad-backup:
-    driver: local
-  zammad-data:
-    driver: local
 
 networks:
   zammad:
