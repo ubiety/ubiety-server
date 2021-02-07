@@ -14,8 +14,8 @@ services:
     image: zammad/zammad-docker-compose:zammad-postgresql-3.6.0-44
     restart: always
     volumes:
-      - /mnt/disks/data/zammad-backup:/var/tmp/zammad
-      - /mnt/disks/data/zammad-data:/opt/zammad
+      - zammad-backup:/var/tmp/zammad
+      - zammad-data:/opt/zammad
     networks:
       - zammad
 
@@ -25,7 +25,7 @@ services:
     image: zammad/zammad-docker-compose:zammad-elasticsearch-3.6.0-44
     restart: always
     volumes:
-      - /mnt/disks/data/elasticsearch-data:/usr/share/elasticsearch/data
+      - elasticsearch-data:/usr/share/elasticsearch/data
     networks:
       - zammad
 
@@ -39,7 +39,7 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: on-failure
     volumes:
-      - /mnt/disks/data/zammad-data:/opt/zammad
+      - zammad-data:/opt/zammad
     networks:
       - zammad
 
@@ -57,7 +57,7 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: always
     volumes:
-      - /mnt/disks/data/zammad-data:/opt/zammad
+      - zammad-data:/opt/zammad
     deploy:
       labels:
         - traefik.enable=true
@@ -74,10 +74,10 @@ services:
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASS}
-    image: postgres:13.1
+    image: postgres:13.1-alpine
     restart: always
     volumes:
-      - /mnt/disks/data/postgresql-data:/var/lib/postgresql/data
+      - postgresql-data:/var/lib/postgresql/data
     networks:
       - zammad
 
@@ -89,7 +89,7 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: always
     volumes:
-      - /mnt/disks/data/zammad-data:/opt/zammad
+      - zammad-data:/opt/zammad
     networks:
       - zammad
 
@@ -101,11 +101,11 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: always
     volumes:
-      - /mnt/disks/data/zammad-data:/opt/zammad
+      - zammad-data:/opt/zammad
     networks:
       - zammad
 
-  zammad-websocket:
+  zammad-websocket:sterfs-volume-plugin
     command: ["zammad-websocket"]
     depends_on:
       - zammad-memcached
@@ -113,9 +113,23 @@ services:
     image: zammad/zammad-docker-compose:zammad-3.6.0-44
     restart: always
     volumes:
-      - /mnt/disks/data/zammad-data:/opt/zammad
+      - zammad-data:/opt/zammad
     networks:
       - zammad
+
+volumes:
+  zammad-data:
+    driver: glusterfs
+    name: "zammad/data"
+  zammad-backup:
+    driver: glusterfs
+    name: "zammad/backup"
+  postgresql-data:
+    driver: glusterfs
+    name: "zammad/postgresql"
+  elasticsearch-data:
+    driver: glusterfs
+    name: "zammad/elasticsearch"
 
 networks:
   zammad:
