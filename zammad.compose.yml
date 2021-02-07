@@ -119,16 +119,16 @@ services:
 
 volumes:
   zammad-data:
-    driver: gluster
+    driver: glusterfs
     name: "ubiety/zammad-data"
   zammad-backup:
-    driver: gluster
+    driver: glusterfs
     name: "ubiety/zammad-backup"
   postgresql-data:
-    driver: gluster
+    driver: glusterfs
     name: "ubiety/postgresql-data"
   elasticsearch-data:
-    driver: gluster
+    driver: glusterfs
     name: "ubiety/elasticsearch-data"
 
 networks:
