@@ -119,16 +119,16 @@ services:
 
 volumes:
   zammad-data:
-    driver: glusterfs
+    driver: gluster
     name: "zammad/data"
   zammad-backup:
-    driver: glusterfs
+    driver: gluster
     name: "zammad/backup"
   postgresql-data:
-    driver: glusterfs
+    driver: gluster
     name: "zammad/postgresql"
   elasticsearch-data:
-    driver: glusterfs
+    driver: gluster
     name: "zammad/elasticsearch"
 
 networks:
